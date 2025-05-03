@@ -158,11 +158,7 @@ export default function ClawdiaPage() {
       <Navbar />
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-2xl mx-auto">
-          <div
-            className={`flex items-center mb-8 ${
-              animate ? "clawdia-appear" : "opacity-0"
-            }`}
-          >
+          <div className="flex items-center mb-8">
             <img
               src="/src/images/clawdia_ok.png"
               alt="Dr. Clawdia"

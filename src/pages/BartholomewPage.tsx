@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,12 @@ import { Loader2, AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { playCatSpeech, stopAllSpeech } from "@/services/elevenlabsService";
 import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
+import { useAudioDetection } from "@/hooks/useAudioDetection";
 
 export default function BartholomewPage() {
   const navigate = useNavigate();
+  const { isTalking } = useAudioDetection();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const [spendingCategories, setSpendingCategories] = useState({
     dining: false,
@@ -41,7 +44,7 @@ export default function BartholomewPage() {
     };
   }, []);
 
-  // play speech when results appear
+  // Play speech when results appear
   useEffect(() => {
     if (showResults && !isSpeechMuted) {
       let speechText = `Hello there! I'm Doctor Bartholomeow, your credit card expert. `;
@@ -53,9 +56,34 @@ export default function BartholomewPage() {
       } else {
         speechText += `I've analyzed your preferences and have some paw-some recommendations for you!`;
       }
-      playCatSpeech("bartholomew", speechText);
+      
+      // Create audio element for speech
+      if (!audioRef.current) {
+        audioRef.current = document.createElement('audio');
+        audioRef.current.style.display = 'none';
+        document.body.appendChild(audioRef.current);
+      }
+      
+      // Play speech and update audio source
+      playCatSpeech("bartholomew", speechText).then(audioUrl => {
+        if (audioRef.current) {
+          audioRef.current.src = audioUrl;
+          audioRef.current.play();
+        }
+      });
     }
   }, [showResults, isSpeechMuted, recommendations]);
+
+  // Cleanup audio element
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.remove();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   // scroll to top when results are shown
   useEffect(() => {
@@ -108,7 +136,6 @@ export default function BartholomewPage() {
 
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-2xl mx-auto">
-
           {/* header + title + volume toggle (only before results) */}
           {!showResults && (
             <div
@@ -116,11 +143,20 @@ export default function BartholomewPage() {
                 animate ? "bartholomeow-appear" : "opacity-0"
               }`}
             >
-              <img
-                src="/src/images/barth_ok.png"
-                alt="Dr. Bartholomeow"
-                className="w-24 h-24 object-contain mr-4"
-              />
+              <div className="relative w-24 h-24 mr-4">
+                <img
+                  src="/src/images/barth_ok.png"
+                  alt="Dr. Bartholomeow"
+                  className="absolute w-full h-full object-contain transition-opacity duration-300"
+                  style={{ opacity: isTalking ? 0 : 1 }}
+                />
+                <img
+                  src="/src/images/barth_talk.png"
+                  alt="Dr. Bartholomeow Talking"
+                  className="absolute w-full h-full object-contain transition-opacity duration-300"
+                  style={{ opacity: isTalking ? 1 : 0 }}
+                />
+              </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <h1 className="text-3xl font-bold text-catty-brown">
@@ -310,17 +346,25 @@ export default function BartholomewPage() {
               </div>
             </div>
           )}
-
         </div>
       </div>
 
       {showResults && (
         <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom">
-          <img
-            src="/src/images/barth_ok.png"
-            alt="Dr. Bartholomeow"
-            className="w-64 h-64 object-contain transform scale-150"
-          />
+          <div className="relative w-64 h-64">
+            <img
+              src="/src/images/barth_ok.png"
+              alt="Dr. Bartholomeow"
+              className="absolute w-full h-full object-contain transform scale-150 transition-opacity duration-300"
+              style={{ opacity: isTalking ? 0 : 1 }}
+            />
+            <img
+              src="/src/images/barth_talk.png"
+              alt="Dr. Bartholomeow Talking"
+              className="absolute w-full h-full object-contain transform scale-150 transition-opacity duration-300"
+              style={{ opacity: isTalking ? 1 : 0 }}
+            />
+          </div>
         </div>
       )}
     </div>

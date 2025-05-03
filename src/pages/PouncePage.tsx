@@ -61,6 +61,7 @@ export default function PouncePage() {
       playCatSpeech("pounce", speechText);
     }
   }, [financialData, isSpeechMuted]);
+
   // --- HANDLER: upload CSV ---
   const handleFileUploaded = (data: any) => {
     if (!data) {
@@ -103,7 +104,6 @@ export default function PouncePage() {
 
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-3xl mx-auto">
-
           {/* TOP BAR: header + volume button */}
           <div className="flex items-center justify-between mb-6">
             {!financialData && (
@@ -133,13 +133,13 @@ export default function PouncePage() {
           {/* CREDENTIALS PLAQUE */}
           {financialData && (
             <>
-            <CatCredentialsPlaque
-              name="Sir Pounce"
-              degree="M.Sc., Financial Planning"
-              school="London School of Economics"
-              schoolLogo="/src/images/lse_logo.png"
-            />
-          <div className="flex justify-center mt-4 mb-4">
+              <CatCredentialsPlaque
+                name="Sir Pounce"
+                degree="M.Sc., Financial Planning"
+                school="London School of Economics"
+                schoolLogo="/src/images/lse_logo.png"
+              />
+              <div className="flex justify-center mt-4 mb-4">
                 <Button variant="ghost" size="icon" onClick={toggleSpeech}>
                   {isSpeechMuted ? (
                     <VolumeX className="h-6 w-6 text-catty-gray" />
@@ -148,7 +148,7 @@ export default function PouncePage() {
                   )}
                 </Button>
               </div>
-          </>
+            </>
           )}
 
           {error && (
@@ -211,7 +211,6 @@ export default function PouncePage() {
           )}
         </div>
       </div>
-
 
       {/* FLOATING FLAVOR IMAGE */}
       {financialData && (
